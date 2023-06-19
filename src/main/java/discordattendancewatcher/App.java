@@ -18,11 +18,12 @@ public class App {
         }
         String token = args[0];
         TemplateLoader.loadTemplate("templates/default.txt");
+        WatchedMessageManager msgMan = new WatchedMessageManager();
         
         // Create bot instance
         JDA bot = JDABuilder.createDefault(token)
             .setStatus(OnlineStatus.ONLINE)
-            .addEventListeners(new CommandListener(), new ReactionListener())
+            .addEventListeners(new CommandListener(msgMan), new ReactionListener(msgMan))
             .setActivity(Activity.watching("attendance"))
             .build();
         bot.awaitReady();

@@ -24,10 +24,10 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class CommandListener extends ListenerAdapter {
     
-    private Map<Long, MessageState> monitoredMessages;
+    WatchedMessageManager msgMan;
     
-    public CommandListener() {
-        monitoredMessages = new HashMap<>();
+    public CommandListener(WatchedMessageManager msgMan) {
+        this.msgMan = msgMan;
     }
     
     @Override
@@ -35,79 +35,27 @@ public class CommandListener extends ListenerAdapter {
         String command = event.getName();
         if(command.equals("watch")) {
             StandardGuildMessageChannel chosenChannel = event.getOption("channel").getAsChannel().asStandardGuildMessageChannel();
-            String date = event.getOption("date").getAsString();
-            String title = event.getOption("title").getAsString();
+            String date     = event.getOption("date").getAsString();
+            String title    = event.getOption("title").getAsString();
             Role roleToPing = event.getOption("role").getAsRole();
             
-            MessageState ms;
+            WatchedMessage ms;
             if(event.getOption("commentator") != null) {
                 Member commentator = event.getOption("commentator").getAsMember();
-                ms = new MessageState(date, title, roleToPing, commentator);
+                ms = new WatchedMessage(date, title, roleToPing, commentator);
             } else {
-                ms = new MessageState(date, title, roleToPing);
+                ms = new WatchedMessage(date, title, roleToPing);
             }
             
-            chosenChannel.sendMessage(createMessage(ms))
+            chosenChannel.sendMessage(MessageBuilder.createMessage(ms))
             .addActionRow(Button.primary("attend", "Attend"), Button.danger("not", "No time"))
             .queue((message) -> {
                 long msgId = message.getIdLong();
-                monitoredMessages.put(msgId, ms);
+                msgMan.addWatchedMessage(msgId, ms);
             }
             );
             event.reply("Done!").setEphemeral(true).queue();
         }
-    }
-    
-    @Override
-    public void onButtonInteraction(ButtonInteractionEvent event) {
-        long msgId = event.getMessageIdLong();
-        
-        if(!monitoredMessages.containsKey(msgId)) {
-            event.reply("Something went wrong. Please contact the bot owner.").queue();
-            return;
-        }
-        
-        MessageState ms = monitoredMessages.get(msgId);
-        Member userWhoClicked = event.getMember();
-        if(ms.hasReacted(userWhoClicked)) {
-            ms.removeReaction(userWhoClicked);
-        }
-        
-        if(event.getComponentId().equals("attend")) {
-            ms.getAttendees().add(userWhoClicked);
-            event.editMessage(rebuildMessage(ms)).queue();
-            event.getHook().sendMessage("You have marked your attendance.").setEphemeral(true).queue();
-        } else if(event.getComponentId().equals("not")) {
-            ms.getAbsentees().add(userWhoClicked);
-            event.editMessage(rebuildMessage(ms)).queue();
-            event.getHook().sendMessage("You have marked your absence.").setEphemeral(true).queue();
-        }
-    }
-    
-    private MessageCreateData createMessage(MessageState ms) {
-        MessageCreateBuilder mcb = new MessageCreateBuilder();
-        StringBuffer attendeesString = new StringBuffer();
-        for(Member member : ms.getAttendees()) {
-            attendeesString.append(member.getAsMention());
-            attendeesString.append("\n");
-        }
-        StringBuffer absenteesString = new StringBuffer();
-        for(Member member : ms.getAbsentees()) {
-            absenteesString.append(member.getAsMention());
-            absenteesString.append("\n");
-        }
-        
-        String message = String.format(TemplateLoader.template, ms.getRoleToPing().getAsMention(), 
-                ms.getTitle(), ms.getDate(), attendeesString.toString(), absenteesString.toString(),
-                ms.getCommentator() == null ? "" : ms.getCommentator().getAsMention(), ms.getRoleToPing().getAsMention());
-        mcb.setContent(message);
-        return mcb.build();
-    }
-    
-    private MessageEditData rebuildMessage(MessageState ms) {
-        MessageEditBuilder meb = new MessageEditBuilder();
-        meb.setContent(createMessage(ms).getContent()); // extract raw content, we want to keep the buttons
-        return meb.build();
     }
     
     @Override

@@ -17,6 +17,7 @@ public class TemplateLoader {
             while((line = reader.readLine()) != null) {
                 template += line + "\n";
             }
+            reader.close();
             return template;
         } catch (FileNotFoundException e) {
             System.out.println("Template not found.");
