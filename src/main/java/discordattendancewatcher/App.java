@@ -17,6 +17,7 @@ public class App {
             return;
         }
         String token = args[0];
+        TemplateLoader.loadTemplate("templates/default.txt");
         
         // Create bot instance
         JDA bot = JDABuilder.createDefault(token)

@@ -1,0 +1,12 @@
+%s %s %s
+
+Drivers attending:
+%s
+
+Drivers not attending:
+%s
+
+Commentator:
+%s
+
+%s : Please confirm your attendance or absence by clicking on the corresponding buttons. You may change your decision at any time, but please confirm your attendence by wednesday.
