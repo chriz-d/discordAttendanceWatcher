@@ -1,15 +1,21 @@
 package discordattendancewatcher;
 
 import java.util.Map;
-import java.text.DateFormat;
-import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WatchedMessageManager {
 
     private Map<Long, WatchedMessage> watchedMessages;
+    private ScheduledExecutorService ses;
+    
     
     public WatchedMessageManager() {
-        watchedMessages = new HashMap<>();
+        watchedMessages = new ConcurrentHashMap<>();
+        ses = Executors.newScheduledThreadPool(1);
     }
     
     public void watchMessage(long msgId, WatchedMessage ws) {
@@ -25,6 +31,12 @@ public class WatchedMessageManager {
     }
     
     public void stopWatchingMessage(long msgId) {
+        WatchedMessage msg = getWatchedMessage(msgId);
+        msg.getChannel().deleteMessageById(msgId).queue();
         watchedMessages.remove(msgId);
+    }
+    
+    public ScheduledExecutorService getScheduledExecutorService() {
+        return ses;
     }
 }

@@ -1,7 +1,8 @@
 package discordattendancewatcher;
 
 import java.util.regex.Pattern;
-
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
@@ -39,12 +40,18 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
             
+            long timestamp = parseDate(date);
+            long currentTimestamp = System.currentTimeMillis() / 1000;
+            if(!isValidDate(timestamp, event)) {
+                return;
+            }
+            
             WatchedMessage ws;
             if(event.getOption("commentator") != null) {
                 Member commentator = event.getOption("commentator").getAsMember();
-                ws = new WatchedMessage(date, title, roleToPing, commentator);
+                ws = new WatchedMessage(chosenChannel, date, title, roleToPing, commentator);
             } else {
-                ws = new WatchedMessage(date, title, roleToPing);
+                ws = new WatchedMessage(chosenChannel, date, title, roleToPing);
             }
             
             chosenChannel.sendMessage(MessageBuilder.createMessage(ws))
@@ -52,11 +59,15 @@ public class CommandListener extends ListenerAdapter {
             .queue((message) -> {
                 long msgId = message.getIdLong();
                 msgMan.watchMessage(msgId, ws);
+                Thread t1 = new Thread(() -> msgMan.stopWatchingMessage(msgId));
+                msgMan.getScheduledExecutorService().schedule(t1, timestamp - currentTimestamp, TimeUnit.SECONDS);
             }
             );
+            
             event.reply("Done!").setEphemeral(true).queue();
             
             // extract date and create timer for removal after event ends
+            
         }
     }
     
@@ -69,17 +80,34 @@ public class CommandListener extends ListenerAdapter {
             event.reply("No permission to post in given channel.").setEphemeral(true).queue();
             return false;
         }
-        if(!roleToPing.isMentionable()) {
-            event.reply("Given role is not pingable by bot.").setEphemeral(true).queue();
-            return false;
-        }
+//        if(!roleToPing.isMentionable()) {
+//            event.reply("Given role is not pingable by bot.").setEphemeral(true).queue();
+//            return false;
+//        }
         return true;
     }
     
     private boolean isValidDateString(String date) {
-        Pattern pattern = Pattern.compile("^<t:([0-9]|[1-9][0-9]+)(>|:[tTdDfFR]>)");
+        Pattern pattern = Pattern.compile("<t:([0-9]|[1-9][0-9]+)(>|:[tTdDfFR]>)");
         Matcher matcher = pattern.matcher(date);
         return matcher.matches();
+    }
+    
+    private long parseDate(String date) {
+        Pattern pattern = Pattern.compile("[0-9]+");
+        Matcher matcher = pattern.matcher(date);
+        matcher.find();
+        return Long.parseLong(matcher.group());
+    }
+    
+    private boolean isValidDate(long timestamp, SlashCommandInteractionEvent event) {
+        System.out.println(System.currentTimeMillis() / 1000);
+        System.out.println(timestamp);
+        if(((System.currentTimeMillis() / 1000) + 5) > timestamp) {
+            event.reply("Invalid date given (past).").setEphemeral(true).queue();
+            return false;
+        }
+        return true;
     }
     
     @Override
