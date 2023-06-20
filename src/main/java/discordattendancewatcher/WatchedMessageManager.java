@@ -1,6 +1,7 @@
 package discordattendancewatcher;
 
 import java.util.Map;
+import java.text.DateFormat;
 import java.util.HashMap;
 
 public class WatchedMessageManager {
@@ -11,7 +12,7 @@ public class WatchedMessageManager {
         watchedMessages = new HashMap<>();
     }
     
-    public void addWatchedMessage(long msgId, WatchedMessage ws) {
+    public void watchMessage(long msgId, WatchedMessage ws) {
         watchedMessages.put(msgId, ws);
     }
     
@@ -23,4 +24,7 @@ public class WatchedMessageManager {
         return watchedMessages.get(msgId);
     }
     
+    public void stopWatchingMessage(long msgId) {
+        watchedMessages.remove(msgId);
+    }
 }

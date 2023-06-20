@@ -31,7 +31,7 @@ public class ReactionListener extends ListenerAdapter {
             ws.getAttendees().add(userWhoClicked);
             event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your attendance.").setEphemeral(true).queue();
-        } else if(event.getComponentId().equals("not")) {
+        } else if(event.getComponentId().equals("absent")) {
             ws.getAbsentees().add(userWhoClicked);
             event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your absence.").setEphemeral(true).queue();
