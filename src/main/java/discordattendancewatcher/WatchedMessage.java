@@ -1,58 +1,70 @@
 package discordattendancewatcher;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
-public class WatchedMessage {
+public class WatchedMessage implements Serializable {
     
-    private Set<Member> attendees;
-    private Set<Member> absentees;
+    private static final long serialVersionUID = 8798489204520754938L;
+    private transient Set<User> attendees;
+    private transient Set<User> absentees;
     
-    private StandardGuildMessageChannel channel;
+    private transient StandardGuildMessageChannel channel;
     
-    private String date;
+    private long date;
     private String title;
-    private Role roleToPing;
-    private Member commentator;
+    private transient Role roleToPing;
     
-    public WatchedMessage(StandardGuildMessageChannel channel, String date, String title, Role roleToPing, Member commentator) {
+    public WatchedMessage(StandardGuildMessageChannel channel, long date, String title, Role roleToPing) {
         this.channel = channel;
-        attendees = new HashSet<>();
-        absentees = new HashSet<>();
+        attendees = Collections.synchronizedSet(new HashSet<>());
+        absentees = Collections.synchronizedSet(new HashSet<>());
         this.date = date;
         this.title = title;
         this.roleToPing = roleToPing;
-        this.commentator = commentator;
     }
     
-    public WatchedMessage(StandardGuildMessageChannel channel, String date, String title, Role roleToPing) {
-        this(channel, date, title, roleToPing, null);
-        attendees = new HashSet<>();
-        absentees = new HashSet<>();
+    public boolean hasReacted(User user) {
+        return attendees.contains(user) || absentees.contains(user);
     }
     
-    public boolean hasReacted(Member member) {
-        return attendees.contains(member) || absentees.contains(member);
+//    public void removeReaction(Member member) {
+//        long memberId = member.getIdLong();
+//        attendees.remove(memberId);
+//        absentees.remove(memberId);
+//    }
+    
+    
+    public void markAttendance(User user) {
+        absentees.remove(user);
+        attendees.add(user);
     }
     
-    public void removeReaction(Member member) {
-        attendees.remove(member);
-        absentees.remove(member);
+    public void markAbsence(User user) {
+        attendees.remove(user);
+        absentees.add(user);
     }
-
-    public Set<Member> getAttendees() {
+    
+    public Set<User> getAttendees() {
         return attendees;
     }
-
-    public Set<Member> getAbsentees() {
+    
+    public Set<User> getAbsentees() {
         return absentees;
     }
-
-    public String getDate() {
+    
+    public long getDate() {
         return date;
     }
 
@@ -64,11 +76,43 @@ public class WatchedMessage {
         return roleToPing;
     }
     
-    public Member getCommentator() {
-        return commentator;
-    }
-    
     public StandardGuildMessageChannel getChannel() {
         return channel;
+    }
+    
+    // JDA does not support serialization, convert all objects to their long ids
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        Set<Long> attendeesLong = new HashSet<>();
+        for(User user : attendees) {
+            attendeesLong.add(user.getIdLong());
+        }
+        out.writeObject(attendeesLong);
+        Set<Long> absenteesLong = new HashSet<>();
+        for(User user : absentees) {
+            absenteesLong.add(user.getIdLong());
+        }
+        out.writeObject(absenteesLong);
+        out.writeObject(channel.getIdLong());
+        out.writeObject(roleToPing.getIdLong());
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        attendees = Collections.synchronizedSet(new HashSet<>());
+        @SuppressWarnings("unchecked")
+        Set<Long> attendeesLong = (Set<Long>) in.readObject();
+        for(Long user : attendeesLong) {
+            attendees.add(App.jda.retrieveUserById(user).complete());
+        }
+        absentees = Collections.synchronizedSet(new HashSet<>());
+        @SuppressWarnings("unchecked")
+        Set<Long> absenteesLong = (Set<Long>) in.readObject();
+        for(Long user : absenteesLong) {
+            absentees.add(App.jda.retrieveUserById(user).complete());
+        }
+        channel = App.jda.getTextChannelById((long) in.readObject());
+        roleToPing = App.jda.getRoleById((long) in.readObject());
+        System.out.println("Done reading");
     }
 }

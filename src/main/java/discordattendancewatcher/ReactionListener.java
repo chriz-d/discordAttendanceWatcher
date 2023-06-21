@@ -1,6 +1,7 @@
 package discordattendancewatcher;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -22,17 +23,17 @@ public class ReactionListener extends ListenerAdapter {
         }
         
         WatchedMessage ws = msgMan.getWatchedMessage(msgId);
-        Member userWhoClicked = event.getMember();
-        if(ws.hasReacted(userWhoClicked)) {
-            ws.removeReaction(userWhoClicked);
-        }
+        User userWhoClicked = event.getUser();
+//        if(ws.hasReacted(userWhoClicked)) {
+//            ws.removeReaction(userWhoClicked);
+//        }
         
         if(event.getComponentId().equals("attend")) {
-            ws.getAttendees().add(userWhoClicked);
+            msgMan.markAttendance(msgId, userWhoClicked);
             event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your attendance.").setEphemeral(true).queue();
         } else if(event.getComponentId().equals("absent")) {
-            ws.getAbsentees().add(userWhoClicked);
+            msgMan.markAbsence(msgId, userWhoClicked);
             event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your absence.").setEphemeral(true).queue();
         }

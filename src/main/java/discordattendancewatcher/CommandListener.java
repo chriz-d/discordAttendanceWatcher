@@ -41,26 +41,17 @@ public class CommandListener extends ListenerAdapter {
             }
             
             long timestamp = parseDate(date);
-            long currentTimestamp = System.currentTimeMillis() / 1000;
             if(!isValidDate(timestamp, event)) {
                 return;
             }
             
-            WatchedMessage ws;
-            if(event.getOption("commentator") != null) {
-                Member commentator = event.getOption("commentator").getAsMember();
-                ws = new WatchedMessage(chosenChannel, date, title, roleToPing, commentator);
-            } else {
-                ws = new WatchedMessage(chosenChannel, date, title, roleToPing);
-            }
-            
+            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, roleToPing);
             chosenChannel.sendMessage(MessageBuilder.createMessage(ws))
             .addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
             .queue((message) -> {
                 long msgId = message.getIdLong();
                 msgMan.watchMessage(msgId, ws);
-                Thread t1 = new Thread(() -> msgMan.stopWatchingMessage(msgId));
-                msgMan.getScheduledExecutorService().schedule(t1, timestamp - currentTimestamp, TimeUnit.SECONDS);
+                msgMan.queueMessageDeletion(msgId, timestamp);
             }
             );
             
@@ -93,7 +84,7 @@ public class CommandListener extends ListenerAdapter {
         return matcher.matches();
     }
     
-    private long parseDate(String date) {
+    public long parseDate(String date) {
         Pattern pattern = Pattern.compile("[0-9]+");
         Matcher matcher = pattern.matcher(date);
         matcher.find();
@@ -101,8 +92,6 @@ public class CommandListener extends ListenerAdapter {
     }
     
     private boolean isValidDate(long timestamp, SlashCommandInteractionEvent event) {
-        System.out.println(System.currentTimeMillis() / 1000);
-        System.out.println(timestamp);
         if(((System.currentTimeMillis() / 1000) + 5) > timestamp) {
             event.reply("Invalid date given (past).").setEphemeral(true).queue();
             return false;
@@ -125,10 +114,9 @@ public class CommandListener extends ListenerAdapter {
         OptionData date = new OptionData(OptionType.STRING, "date", "Date and time the event will start. (Use <t:XXX:F> if possible)", true);
         OptionData title = new OptionData(OptionType.STRING, "title", "Title of the event. (E.g. Season 2 - Round 7:  🇮🇹 Misano 🇮🇹)", true);
         OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
-        OptionData commentator = new OptionData(OptionType.MENTIONABLE, "commentator", "Who will commentate the event.", false);
         
         SlashCommandData command = Commands.slash("watch", "Posts a new event while watching for reactions.")
-                .addOptions(chosenChannel, date, title, roleToPing, commentator);
+                .addOptions(chosenChannel, date, title, roleToPing);
         event.getGuild().updateCommands().addCommands(command).queue();
     }
 }
