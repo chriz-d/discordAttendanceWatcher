@@ -40,7 +40,7 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
             
-            long timestamp = parseDate(date);
+            long timestamp = Long.parseLong(date);
             if(!isValidDate(timestamp, event)) {
                 return;
             }
@@ -79,16 +79,12 @@ public class CommandListener extends ListenerAdapter {
     }
     
     private boolean isValidDateString(String date) {
-        Pattern pattern = Pattern.compile("<t:([0-9]|[1-9][0-9]+)(>|:[tTdDfFR]>)");
-        Matcher matcher = pattern.matcher(date);
-        return matcher.matches();
-    }
-    
-    public long parseDate(String date) {
-        Pattern pattern = Pattern.compile("[0-9]+");
-        Matcher matcher = pattern.matcher(date);
-        matcher.find();
-        return Long.parseLong(matcher.group());
+        try {
+            Long.parseLong(date);
+        } catch(NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
     
     private boolean isValidDate(long timestamp, SlashCommandInteractionEvent event) {
@@ -111,7 +107,7 @@ public class CommandListener extends ListenerAdapter {
     
     private void registerCommands(GenericGuildEvent event) {
         OptionData chosenChannel = new OptionData(OptionType.CHANNEL, "channel", "The channel the bot will post in.", true);
-        OptionData date = new OptionData(OptionType.STRING, "date", "Date and time the event will start. (Use <t:XXX:F> if possible)", true);
+        OptionData date = new OptionData(OptionType.STRING, "date", "Date and time the event will start. (Unix timestamp, that really big number)", true);
         OptionData title = new OptionData(OptionType.STRING, "title", "Title of the event. (E.g. Season 2 - Round 7:  🇮🇹 Misano 🇮🇹)", true);
         OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
         

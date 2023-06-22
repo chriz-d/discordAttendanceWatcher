@@ -113,6 +113,5 @@ public class WatchedMessage implements Serializable {
         }
         channel = App.jda.getTextChannelById((long) in.readObject());
         roleToPing = App.jda.getRoleById((long) in.readObject());
-        System.out.println("Done reading");
     }
 }
