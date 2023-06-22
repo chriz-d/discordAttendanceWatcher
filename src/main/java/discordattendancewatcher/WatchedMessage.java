@@ -1,7 +1,6 @@
 package discordattendancewatcher;
 
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -9,9 +8,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
 public class WatchedMessage implements Serializable {
@@ -20,13 +19,13 @@ public class WatchedMessage implements Serializable {
     private transient Set<User> attendees;
     private transient Set<User> absentees;
     
-    private transient StandardGuildMessageChannel channel;
+    private transient TextChannel channel;
     
     private long date;
     private String title;
     private transient Role roleToPing;
     
-    public WatchedMessage(StandardGuildMessageChannel channel, long date, String title, Role roleToPing) {
+    public WatchedMessage(TextChannel channel, long date, String title, Role roleToPing) {
         this.channel = channel;
         attendees = Collections.synchronizedSet(new HashSet<>());
         absentees = Collections.synchronizedSet(new HashSet<>());
@@ -38,13 +37,6 @@ public class WatchedMessage implements Serializable {
     public boolean hasReacted(User user) {
         return attendees.contains(user) || absentees.contains(user);
     }
-    
-//    public void removeReaction(Member member) {
-//        long memberId = member.getIdLong();
-//        attendees.remove(memberId);
-//        absentees.remove(memberId);
-//    }
-    
     
     public void markAttendance(User user) {
         absentees.remove(user);

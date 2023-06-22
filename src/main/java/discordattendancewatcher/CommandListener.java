@@ -1,11 +1,7 @@
 package discordattendancewatcher;
 
-import java.util.regex.Pattern;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 
-import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -16,12 +12,11 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 
 public class CommandListener extends ListenerAdapter {
     
-    WatchedMessageManager msgMan;
+    private WatchedMessageManager msgMan;
     
     public CommandListener(WatchedMessageManager msgMan) {
         this.msgMan = msgMan;
@@ -31,7 +26,7 @@ public class CommandListener extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         String command = event.getName();
         if(command.equals("watch")) {
-            StandardGuildMessageChannel chosenChannel = event.getOption("channel").getAsChannel().asStandardGuildMessageChannel();
+            TextChannel chosenChannel = event.getOption("channel").getAsChannel().asTextChannel();
             String date     = event.getOption("date").getAsString();
             String title    = event.getOption("title").getAsString();
             Role roleToPing = event.getOption("role").getAsRole();
@@ -52,17 +47,13 @@ public class CommandListener extends ListenerAdapter {
                 long msgId = message.getIdLong();
                 msgMan.watchMessage(msgId, ws);
                 msgMan.queueMessageDeletion(timestamp, msgId);
-            }
-            );
+            });
             
             event.reply("Done!").setEphemeral(true).queue();
-            
-            // extract date and create timer for removal after event ends
-            
         }
     }
     
-    private boolean inputsValid(StandardGuildMessageChannel chosenChannel, String date, String title, Role roleToPing, SlashCommandInteractionEvent event) {
+    private boolean inputsValid(TextChannel chosenChannel, String date, String title, Role roleToPing, SlashCommandInteractionEvent event) {
         if(!isValidDateString(date)) {
             event.reply("The date string was not formatted correctly. See the parameter description for an example.").setEphemeral(true).queue();
             return false;
@@ -71,10 +62,10 @@ public class CommandListener extends ListenerAdapter {
             event.reply("No permission to post in given channel.").setEphemeral(true).queue();
             return false;
         }
-//        if(!roleToPing.isMentionable()) {
-//            event.reply("Given role is not pingable by bot.").setEphemeral(true).queue();
-//            return false;
-//        }
+        if(!roleToPing.isMentionable()) {
+            event.reply("Given role is not pingable by bot.").setEphemeral(true).queue();
+            return false;
+        }
         return true;
     }
     
@@ -111,7 +102,7 @@ public class CommandListener extends ListenerAdapter {
         OptionData title = new OptionData(OptionType.STRING, "title", "Title of the event. (E.g. Season 2 - Round 7:  🇮🇹 Misano 🇮🇹)", true);
         OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
         
-        SlashCommandData command = Commands.slash("watch", "Posts a new event while watching for reactions.")
+        SlashCommandData command = Commands.slash("createEvent", "Posts a new event while watching for reactions.")
                 .addOptions(chosenChannel, date, title, roleToPing);
         event.getGuild().updateCommands().addCommands(command).queue();
     }
