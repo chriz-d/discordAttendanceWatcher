@@ -25,7 +25,7 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         String command = event.getName();
-        if(command.equals("watch")) {
+        if(command.equals("createevent")) {
             TextChannel chosenChannel = event.getOption("channel").getAsChannel().asTextChannel();
             String date     = event.getOption("date").getAsString();
             String title    = event.getOption("title").getAsString();
@@ -102,7 +102,7 @@ public class CommandListener extends ListenerAdapter {
         OptionData title = new OptionData(OptionType.STRING, "title", "Title of the event. (E.g. Season 2 - Round 7:  🇮🇹 Misano 🇮🇹)", true);
         OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
         
-        SlashCommandData command = Commands.slash("createEvent", "Posts a new event while watching for reactions.")
+        SlashCommandData command = Commands.slash("createevent", "Posts a new event while watching for reactions.")
                 .addOptions(chosenChannel, date, title, roleToPing);
         event.getGuild().updateCommands().addCommands(command).queue();
     }
