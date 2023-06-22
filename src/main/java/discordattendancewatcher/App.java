@@ -21,7 +21,7 @@ public class App {
     public static void main(String[] args) throws InterruptedException, ClassNotFoundException, IOException {
         String token;
         try {
-            token = Files.readString(Path.of("token.txt"));
+            token = Files.readString(Path.of("token.txt")).strip();
         } catch (IOException e) {
             System.out.println("Please provide a bot token.");
             return;
