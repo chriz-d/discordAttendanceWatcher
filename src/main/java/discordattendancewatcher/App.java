@@ -2,6 +2,8 @@ package discordattendancewatcher;
 
 import java.io.File;
 import java.io.ObjectInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,17 +19,20 @@ public class App {
     
     
     public static void main(String[] args) throws InterruptedException, ClassNotFoundException, IOException {
-        if(args.length == 0) {
-            System.out.println("Please provide the bot token as an argument.");
+        String token;
+        try {
+            token = Files.readString(Path.of("token.txt"));
+        } catch (IOException e) {
+            System.out.println("Please provide a bot token.");
             return;
         }
-        String token = args[0];
+        
         TemplateLoader.loadTemplate("templates/default.txt");
         
         // Create bot instance
         jda = JDABuilder.createDefault(token)
             .setStatus(OnlineStatus.ONLINE)
-            .setActivity(Activity.watching("attendance"))
+            .setActivity(Activity.watching("your attendance"))
             .build();
         jda.awaitReady();
         

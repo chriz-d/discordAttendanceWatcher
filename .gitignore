@@ -9,3 +9,5 @@ build
 .project
 .settings
 bin
+
+token.txt
