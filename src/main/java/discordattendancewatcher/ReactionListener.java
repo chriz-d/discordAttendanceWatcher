@@ -24,9 +24,6 @@ public class ReactionListener extends ListenerAdapter {
         
         WatchedMessage ws = msgMan.getWatchedMessage(msgId);
         User userWhoClicked = event.getUser();
-//        if(ws.hasReacted(userWhoClicked)) {
-//            ws.removeReaction(userWhoClicked);
-//        }
         
         if(event.getComponentId().equals("attend")) {
             msgMan.markAttendance(msgId, userWhoClicked);

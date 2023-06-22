@@ -5,7 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WatchedMessageManager implements Serializable {
 
     private static final long serialVersionUID = -5171307135508414035L;
-    public Map<Long, WatchedMessage> watchedMessages;
+    private Map<Long, WatchedMessage> watchedMessages;
     private transient ScheduledExecutorService ses;
     
     
@@ -44,7 +46,7 @@ public class WatchedMessageManager implements Serializable {
     
     public void stopWatchingMessage(long msgId) {
         WatchedMessage msg = getWatchedMessage(msgId);
-        msg.getChannel().deleteMessageById(msgId);
+        msg.getChannel().deleteMessageById(msgId).queue();
         watchedMessages.remove(msgId);
         System.out.printf("Deleted message and monitoring total of %d messages\n", watchedMessages.size());
         saveChanges();
@@ -53,16 +55,15 @@ public class WatchedMessageManager implements Serializable {
     public void queueMessageDeletion(long timestamp, long msgId) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         Thread t1 = new Thread(() -> stopWatchingMessage(msgId));
+        System.out.printf("Scheduling deletion in %d seconds\n", timestamp - currentTimestamp);
         ses.schedule(t1, timestamp - currentTimestamp, TimeUnit.SECONDS);
     }
     
-    public void rescheduleMessageDeletion() {
+    private void rescheduleMessageDeletion() {
         for(long msgId : watchedMessages.keySet()) {
             WatchedMessage wm = watchedMessages.get(msgId);
             long timestamp = wm.getDate();
-            long currentTimestamp = System.currentTimeMillis() / 1000;
-            Thread t1 = new Thread(() -> stopWatchingMessage(msgId));
-            ses.schedule(t1, timestamp - currentTimestamp, TimeUnit.SECONDS);
+            queueMessageDeletion(timestamp, msgId);
         }
     }
     
@@ -93,5 +94,6 @@ public class WatchedMessageManager implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         ses = Executors.newScheduledThreadPool(1);
+        rescheduleMessageDeletion();
     }
 }

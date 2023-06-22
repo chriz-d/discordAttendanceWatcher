@@ -37,15 +37,6 @@ public class App {
             ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("currentWatched.ser"));
             msgMan = (WatchedMessageManager) objectInputStream.readObject();
             objectInputStream.close();
-            msgMan.rescheduleMessageDeletion();
-            System.out.printf("Loaded %d previous messages\n", msgMan.watchedMessages.size());
-            for(WatchedMessage msg : msgMan.watchedMessages.values()) {
-                System.out.printf("Attendeees:\n");
-                System.out.println(Arrays.toString(msg.getAttendees().toArray()));
-                
-                System.out.printf("Absentees:\n");
-                System.out.println(Arrays.toString(msg.getAbsentees().toArray()));
-            }
         } else {
             msgMan = new WatchedMessageManager();
             System.out.println("No old messages found, creating new MessageManager");
