@@ -17,7 +17,6 @@ public class App {
     
     public static JDA jda;
     
-    
     public static void main(String[] args) throws InterruptedException, ClassNotFoundException, IOException {
         String token;
         try {

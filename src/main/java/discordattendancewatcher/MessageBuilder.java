@@ -23,7 +23,7 @@ public class MessageBuilder {
         
         String message = String.format(TemplateLoader.template, ms.getRoleToPing().getAsMention(), 
                 ms.getTitle(), ms.getDate(), attendeesString.toString(), absenteesString.toString(),
-                ms.getRoleToPing().getAsMention());
+                ms.getAttendees().size(), ms.getAbsentees().size(), ms.getRoleToPing().getAsMention());
         mcb.setContent(message);
         return mcb.build();
     }

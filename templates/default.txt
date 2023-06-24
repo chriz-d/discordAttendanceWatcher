@@ -6,4 +6,7 @@ Drivers attending :white_check_mark::
 Drivers not attending :x::
 %s
 
+Total:
+:white_check_mark:: %d   :x:: %d
+
 %s : Please confirm your attendance or absence by clicking on the corresponding buttons.

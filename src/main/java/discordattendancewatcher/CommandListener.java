@@ -30,7 +30,6 @@ public class CommandListener extends ListenerAdapter {
             String date     = event.getOption("date").getAsString();
             String title    = event.getOption("title").getAsString();
             Role roleToPing = event.getOption("role").getAsRole();
-            System.out.println(date);
             if(!inputsValid(chosenChannel, date, title, roleToPing, event)) {
                 return;
             }
