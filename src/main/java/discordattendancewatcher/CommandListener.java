@@ -1,18 +1,19 @@
 package discordattendancewatcher;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
-import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import okhttp3.internal.ws.RealWebSocket.Message;
 
 public class CommandListener extends ListenerAdapter {
     
@@ -49,6 +50,33 @@ public class CommandListener extends ListenerAdapter {
             });
             
             event.reply("Done!").setEphemeral(true).queue();
+        } else if(command.equals("racestats")) {
+            event.deferReply().queue();
+            String outputPath = "temp/";
+            String url = event.getOption("url").getAsString();
+            String title = event.getOption("title").getAsString();
+            Process p;
+            String s;
+            try {
+                p = Runtime.getRuntime().exec(new String[] {".venv/bin/python", "src/main/python/screenshot.py", url, outputPath});
+                BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                while ((s = br.readLine()) != null)
+                    System.out.println("line: " + s);
+                p.waitFor();
+                System.out.println ("exit: " + p.exitValue());
+                p.destroy();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            MessageCreateBuilder builder = new MessageCreateBuilder();
+            builder.setContent(title);
+            File dir = new File(outputPath);
+            if(dir.exists() && dir.isDirectory()) {
+                for(File file : dir.listFiles()) {
+                    builder.addFiles(FileUpload.fromData(file, file.getName()));
+                }                
+            }
+            event.getHook().sendMessage(builder.build()).queue();
         }
     }
     
@@ -83,26 +111,5 @@ public class CommandListener extends ListenerAdapter {
             return false;
         }
         return true;
-    }
-    
-    @Override
-    public void onGuildReady(GuildReadyEvent event) {
-        registerCommands(event);
-    }
-    
-    @Override
-    public void onGuildJoin(GuildJoinEvent event) {
-        registerCommands(event);
-    }
-    
-    private void registerCommands(GenericGuildEvent event) {
-        OptionData chosenChannel = new OptionData(OptionType.CHANNEL, "channel", "The channel the bot will post in.", true);
-        OptionData date = new OptionData(OptionType.STRING, "date", "Date and time the event will start. (Unix timestamp, that really big number)", true);
-        OptionData title = new OptionData(OptionType.STRING, "title", "Title of the event. (E.g. Season 2 - Round 7:  🇮🇹 Misano 🇮🇹)", true);
-        OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
-        
-        SlashCommandData command = Commands.slash("createevent", "Posts a new event while watching for reactions.")
-                .addOptions(chosenChannel, date, title, roleToPing);
-        event.getGuild().updateCommands().addCommands(command).queue();
     }
 }

@@ -1,0 +1,368 @@
+<style>
+    body {
+        background-color: white;
+        font-family: sans-serif;
+    }
+
+    .row {
+        display: table;
+        width: 100%; /*Optional*/
+        table-layout: fixed; /*Optional*/
+        border-spacing: 10px; /*Optional*/
+    }
+
+    .span4 {
+        display: table-cell;
+    }
+    .span6 {
+        display: table-cell;
+    }
+
+    table {
+			border-collapse: collapse;
+			width: 100%;
+			color: #333;
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+			text-align: left;
+			border-radius: 10px;
+			overflow: hidden;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+			margin: auto;
+			margin-top: 50px;
+			margin-bottom: 50px;
+		}
+		table th {
+			background-color: #ff9800;
+			color: #fff;
+			font-weight: bold;
+			padding: 10px;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			border-top: 1px solid #fff;
+			border-bottom: 1px solid #ccc;
+		}
+		table tr:nth-child(even) td {
+			background-color: #f2f2f2;
+		}
+		table tr:hover td {
+			background-color: #ffedcc;
+		}
+		table td {
+			background-color: #fff;
+			padding: 10px;
+			border-bottom: 1px solid #ccc;
+			font-weight: bold;
+		}
+        @media (max-width: 980px) {
+            body {
+              padding-top: 0;
+            }
+        }
+
+
+		html {
+    		overflow-y: scroll;
+		}
+
+
+		.aids {
+			font-size: 10px;
+			/*width: 30%;*/
+		}
+
+		.pos-updiff .pos-arrow {
+		    color: #009933;
+		}
+
+		.pos-downdiff .pos-arrow {
+		    color: #CC0033
+		}
+
+		.pos-nodiff .pos-arrow {
+		    color: #F88017;
+		}
+
+
+		.graph-legend {
+			float: left;
+			padding-right: 10px;
+			max-width: 200px;
+		}
+
+
+        .graph-fullscreen .graph-legend {
+            width: 20% ;
+            height: 90% ;
+            padding: 0 ;
+            margin: 0;
+        }
+
+		.graph-container {
+		    box-sizing: border-box;
+		    width: 880px;
+		    height: 490px;
+		    padding: 20px 15px 15px 15px;
+		    border: 1px solid #ddd;
+		    overflow: hidden;
+		    background: #fff;
+		    background: linear-gradient(#f6f6f6 0, #fff 50px);
+		    background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+		    background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+		    background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+		    background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+		    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+		    -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+		    -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+		    -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+		    -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+		}
+
+        .graph-fullscreen .graph-container {
+            width: 80% ;
+            height: 90% ;
+            padding: 0 ;
+            margin: 0;
+        }
+
+		.graph-placeholder {
+		    width: 850px;
+		    height: 450px;
+		    font-size: 14px;
+		    line-height: 1.2em;
+		    margin: 0;
+		    padding: 0;
+		}
+
+        .graph-fullscreen .graph-placeholder {
+            width: 100% ;
+            height: 100% ;
+            padding: 0 ;
+            margin: 0;
+        }
+
+
+        .graph-fullscreen {
+            z-index: 9999 !important;
+            width: 100% !important;
+            height: 100% !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            background: #fff;
+            overflow: auto;
+         }
+
+
+
+		.laps-legend-best-lap-and-sector .laps-legend-color {
+		    font-size: 23px;
+		    color: #009900;
+		}
+
+		.laps-legend-overall-best-lap-by-number .laps-legend-color{
+		    font-size: 23px;
+		    color: #23819C;
+		}
+
+		.laps-legend-overall-best-lap-by-number-and-personal .laps-legend-color{
+		    font-size: 23px;
+		    color: #A55FEB;
+		}
+
+		.laps-legend-overall-best-lap-and-sector .laps-legend-color{
+		    font-size: 23px;
+		    color: #FF4848;
+		}
+
+		.laps-legend-overall-bad-lap .laps-legend-color{
+		    font-size: 23px;
+		    color: #C27E3A;
+		}
+
+		.laps-legend-invalid-for-best-lap .laps-legend-color{
+		    font-size: 23px;
+		    color: #fff700;
+		}
+
+
+
+		/* Following CSS rules are in order of importantness. Later statements overrule */
+
+		.laps .overall-bad-lap td {
+            background-color: #EECFA1 !important;
+        }
+
+		.laps .best-lap td {
+		    background-color: #D2FFC4 !important;
+		}
+
+		.laps .overall-best-lap-by-number td{
+		    background-color: #CEFFFD !important;
+		}
+
+		.laps .best-lap.overall-best-lap-by-number td {
+		    background-color: #EDDFFB !important;
+		}
+
+		.laps .overall-best-lap td {
+		    background-color: #FFCECE !important;
+		}
+
+		.laps .invalid-for-best-lap td {
+		    background-color: #fffdc0 !important;
+		}
+
+
+		.laps .best-sector {
+		    font-weight: bold;
+		    color: #009900;
+		}
+
+		.laps .overall-best-sector-by-number{
+		    font-weight: bold;
+		    color: #23819C;
+		}
+
+		.laps .best-sector.overall-best-sector-by-number {
+		    font-weight: bold;
+		    color: #A55FEB;
+		}
+
+		.laps .overall-best-sector {
+		    font-weight: bold;
+		    color: #FF4848;
+		}
+
+
+
+		.incidents-legend-incident-for-review .incidents-legend-color{
+		    font-size: 23px;
+		    color: #FFFF00;
+		}
+
+		.incidents .incident-for-review td {
+            background-color: #FFFF99 !important;
+        }
+
+
+
+
+		.addthis_toolbox {
+			padding: 10px 0 0 0;
+		}
+
+
+		#topblock-container {
+			padding-bottom: 20px;
+			display: inline-block;
+			font-size: 16px;
+			text-align: center;
+/*			width: 728px;
+			height: 90px; */
+		}
+
+		#topblock-image {
+			min-height: 90px;
+			max-height: 90px;
+			max-width: 100%;
+			overflow: hidden;
+		}
+
+		.sideblock-image {
+			text-align: center;
+			margin-bottom: 60px;
+		}
+
+
+		.midblock-image {
+/*			margin-top:  10px;
+			text-align: center;
+*/			margin-bottom: 10px;
+		}
+
+		#sideblock-image2, .sideblock-image2 {
+			margin-top: 70px;
+			margin-bottom: 10px;
+		}
+
+		.bottomblock-image {
+			height: 350px;
+		}
+
+		.nav-option a {
+			color: #00E;
+		}
+
+		.nav-option--first {
+			border-left: 1px solid #ccc;
+			margin-left: 5px;
+		}
+
+		#toTop{
+			position: fixed;
+			bottom: 10px;
+			right: 10px;
+			cursor: pointer;
+			display: none;
+		}
+
+        .jump-container {
+            position: relative;
+        }
+
+		.nav-info {
+			font-size:  15px;
+			display: none;
+		}
+
+		@media (min-width: 960px) {
+			.nav-info {
+				width:  45%;
+			}
+		}
+
+
+        @media (min-width: 979px) {
+            .jump-id {
+                position: absolute;
+                top: -45px;
+            }
+        }
+
+        @media (max-width: 979px) {
+            .jump-id {
+                position: absolute;
+                top: -1px;
+            }
+        }
+
+        @media print {
+            #topblock-image, .nav-tabs, .nav-donate-container, .nav-sponsors-container, .nav-more-results-container, .rrssb-buttons {
+                display: none;
+            }
+        }
+
+        .spnr {
+            margin-bottom: 50px;
+            margin-right: 50px;
+            display: inline-block;
+        }
+
+        .spnr:last-of-type {
+            margin-bottom: 0 !important;
+        }
+
+        .spnr-text {
+            display: inline-block;
+            margin-bottom: 50px;
+            font-size: 35px;
+        }
+
+        .spnr-text a{
+            text-decoration: none;
+            color: #000;
+        }
+</style>
+
+<script src="src/main/python/combined.min.js"></script>

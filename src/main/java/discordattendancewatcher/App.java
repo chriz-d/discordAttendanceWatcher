@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -46,6 +45,6 @@ public class App {
             System.out.println("No old messages found, creating new MessageManager");
         }
         
-        jda.addEventListener(new CommandListener(msgMan), new ReactionListener(msgMan));
+        jda.addEventListener(new CommandRegister(), new CommandListener(msgMan), new ReactionListener(msgMan));
     }
 }

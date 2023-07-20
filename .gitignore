@@ -11,3 +11,5 @@ build
 bin
 
 token.txt
+.vscode
+temp/
