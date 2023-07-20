@@ -30,11 +30,11 @@ def getHtml(url):
 def downloadHtml(url):
     # Fetch HTML
     url = str(sys.argv[1])
-    # req = requests.get(url)
-    req = ""
-    with open("src/main/python/results.html", "r") as f:
-        req = f.read()
-    return req
+    req = requests.get(url)
+    #req = ""
+    #with open("src/main/python/testpage.html", "r") as f:
+    #    req = f.read()
+    return req.content
 
 def extractContent(soup):
     ids = ["race1bestlaps", "race1consistency", "race1sectors", "race1positions-graph"]
@@ -45,8 +45,11 @@ def extractContent(soup):
     return content
 
 def extractInlineScript(soup):
-    script = soup.find_all("script")[8] # Nice magic number
-    return str(script.prettify())
+    scripts = soup.find_all("script")
+    for script in scripts:
+        if "Add all lap positions" in str(script.prettify):
+            return str(script.prettify())
+    return ""
 
 def cleanUpTags(soup): 
     # Clear pesky ads
@@ -59,6 +62,7 @@ def createScreenshot(content, style, path):
     hti = Html2Image(custom_flags=['--window-size=1100,1000', '--hide-scrollbars'], output_path=path)
     for value, key in enumerate(content):
         with open("temp.html", "w") as f:
+            # f.write(style + content[key])
             hti.screenshot(html_str= style + content[key], save_as=f"out_{value}.png")
 
 if __name__ == "__main__":
