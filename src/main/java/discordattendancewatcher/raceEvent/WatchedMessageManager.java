@@ -1,4 +1,4 @@
-package discordattendancewatcher;
+package discordattendancewatcher.raceEvent;
 
 import java.io.Serializable;
 import java.io.FileOutputStream;

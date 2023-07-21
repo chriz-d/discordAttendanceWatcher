@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.ObjectInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import discordattendancewatcher.raceEvent.ReactionListener;
+import discordattendancewatcher.raceEvent.WatchedMessageManager;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 

@@ -3,17 +3,18 @@ package discordattendancewatcher;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 
+import discordattendancewatcher.raceEvent.MessageBuilder;
+import discordattendancewatcher.raceEvent.WatchedMessage;
+import discordattendancewatcher.raceEvent.WatchedMessageManager;
+import discordattendancewatcher.raceStats.RaceStatsParser;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import okhttp3.internal.ws.RealWebSocket.Message;
 
 public class CommandListener extends ListenerAdapter {
     
@@ -55,27 +56,18 @@ public class CommandListener extends ListenerAdapter {
             String outputPath = "temp/";
             String url = event.getOption("url").getAsString();
             String title = event.getOption("title").getAsString();
-            Process p;
-            String s;
-            try {
-                p = Runtime.getRuntime().exec(new String[] {".venv/bin/python", "src/main/python/screenshot.py", url, outputPath});
-                BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                while ((s = br.readLine()) != null)
-                    System.out.println("line: " + s);
-                p.waitFor();
-                System.out.println ("exit: " + p.exitValue());
-                p.destroy();
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+            RaceStatsParser.parse(url, outputPath);
+            File dir = new File(outputPath);
+            if(!dir.exists() || !dir.isDirectory()) {
+                event.getHook().sendMessage("Failed to generate images.");
+                return;
+            } 
             MessageCreateBuilder builder = new MessageCreateBuilder();
             builder.setContent(title);
-            File dir = new File(outputPath);
-            if(dir.exists() && dir.isDirectory()) {
-                for(File file : dir.listFiles()) {
-                    builder.addFiles(FileUpload.fromData(file, file.getName()));
-                }                
+            for(File file : dir.listFiles()) {
+                builder.addFiles(FileUpload.fromData(file, file.getName()));
             }
+            dir.delete();
             event.getHook().sendMessage(builder.build()).queue();
         }
     }

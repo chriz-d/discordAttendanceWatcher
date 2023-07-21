@@ -1,6 +1,9 @@
-package discordattendancewatcher;
+package discordattendancewatcher.raceEvent;
 
 import java.util.Set;
+
+import discordattendancewatcher.App;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
