@@ -1,7 +1,6 @@
 package discordattendancewatcher;
 
 
-import java.io.BufferedReader;
 import java.io.File;
 
 import discordattendancewatcher.raceEvent.MessageBuilder;
@@ -66,6 +65,11 @@ public class CommandListener extends ListenerAdapter {
             builder.setContent(title);
             for(File file : dir.listFiles()) {
                 builder.addFiles(FileUpload.fromData(file, file.getName()));
+            }
+            String[] entries = dir.list();
+            for(String s: entries){
+                File currentFile = new File(dir.getPath(), s);
+                currentFile.delete();
             }
             dir.delete();
             event.getHook().sendMessage(builder.build()).queue();
