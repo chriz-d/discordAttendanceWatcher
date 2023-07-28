@@ -54,15 +54,19 @@ def extractInlineScript(soup):
 def cleanUpTags(soup): 
     # Clear pesky ads
     results = soup.find_all("div", {"class": ["sideblock-image", "midblock-image"]})
+    # Clear other unneeded tags
+    results += soup.find_all("a")
+    results += soup.find_all("p")
+    results += soup.find_all("h4")
     for result in results:
         result.decompose()
 
 def createScreenshot(content, style, path):
     # Iterate through desired graphics, append css and screenshot it
-    hti = Html2Image(custom_flags=['--window-size=1100,1000', '--hide-scrollbars'], output_path=path)
+    hti = Html2Image(custom_flags=['--window-size=1200,1000', '--hide-scrollbars'], output_path=path)
     for value, key in enumerate(content):
         with open("temp.html", "w") as f:
-            # f.write(style + content[key])
+            f.write(style + content[key])
             hti.screenshot(html_str= style + content[key], save_as=f"out_{value}.png")
 
 if __name__ == "__main__":
