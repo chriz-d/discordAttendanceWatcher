@@ -5,12 +5,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,9 +45,9 @@ public class WatchedMessageManager implements Serializable {
     
     public void stopWatchingMessage(long msgId) {
         WatchedMessage msg = getWatchedMessage(msgId);
-        msg.getChannel().deleteMessageById(msgId).queue();
+        msg.getChannel().editMessageComponentsById(msgId, new ArrayList<LayoutComponent>()).queue(); // create empty list to remove buttons
         watchedMessages.remove(msgId);
-        System.out.printf("Deleted message and monitoring total of %d messages\n", watchedMessages.size());
+        System.out.printf("Stopped watching message and monitoring total of %d messages\n", watchedMessages.size());
         saveChanges();
     }
     
