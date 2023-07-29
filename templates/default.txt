@@ -1,4 +1,4 @@
-%s %s <t:%s:F>
+%s %s %s <t:%s:F>
 
 Drivers attending :white_check_mark::
 %s

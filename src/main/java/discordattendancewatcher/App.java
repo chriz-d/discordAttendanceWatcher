@@ -31,12 +31,6 @@ public class App {
         
         TemplateLoader.loadTemplate("templates/default.txt");
         
-        // Create bot instance
-        jda = JDABuilder.createDefault(token)
-            .setStatus(OnlineStatus.ONLINE)
-            .setActivity(Activity.watching("your attendance"))
-            .build();
-        jda.awaitReady();
         
         WatchedMessageManager msgMan;
         File f = new File("currentWatched.ser");
@@ -49,6 +43,12 @@ public class App {
             System.out.println("No old messages found, creating new MessageManager");
         }
         
-        jda.addEventListener(new CommandRegister(), new CommandListener(msgMan), new ReactionListener(msgMan));
+        // Create bot instance
+        jda = JDABuilder.createDefault(token)
+            .setStatus(OnlineStatus.ONLINE)
+            .setActivity(Activity.watching("your attendance"))
+            .addEventListeners(new CommandRegister(), new CommandListener(msgMan), new ReactionListener(msgMan))
+            .build();
+        jda.awaitReady();
     }
 }

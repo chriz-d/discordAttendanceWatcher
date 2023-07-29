@@ -27,14 +27,16 @@ public class WatchedMessage implements Serializable {
     private long date;
     private String title;
     private transient Role roleToPing;
+    private transient Role reserveRoleToPing;
     
-    public WatchedMessage(TextChannel channel, long date, String title, Role roleToPing) {
+    public WatchedMessage(TextChannel channel, long date, String title, Role roleToPing, Role reserveRoleToPing) {
         this.channel = channel;
         attendees = Collections.synchronizedSet(new HashSet<>());
         absentees = Collections.synchronizedSet(new HashSet<>());
         this.date = date;
         this.title = title;
         this.roleToPing = roleToPing;
+        this.reserveRoleToPing = reserveRoleToPing;
     }
     
     public boolean hasReacted(User user) {
@@ -71,6 +73,10 @@ public class WatchedMessage implements Serializable {
         return roleToPing;
     }
     
+    public Role getReserveRoleToPing() {
+        return reserveRoleToPing;
+    }
+    
     public StandardGuildMessageChannel getChannel() {
         return channel;
     }
@@ -90,6 +96,7 @@ public class WatchedMessage implements Serializable {
         out.writeObject(absenteesLong);
         out.writeObject(channel.getIdLong());
         out.writeObject(roleToPing.getIdLong());
+        out.writeObject(reserveRoleToPing.getIdLong());
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -108,5 +115,6 @@ public class WatchedMessage implements Serializable {
         }
         channel = App.jda.getTextChannelById((long) in.readObject());
         roleToPing = App.jda.getRoleById((long) in.readObject());
+        reserveRoleToPing = App.jda.getRoleById((long) in.readObject());
     }
 }

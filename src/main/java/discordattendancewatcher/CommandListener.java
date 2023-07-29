@@ -17,6 +17,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 public class CommandListener extends ListenerAdapter {
     
+    private static final String ACC_EVENT_CMD = "accevent";
+    private static final String RACE_STATS_CMD = "racestats";
+
     private WatchedMessageManager msgMan;
     
     public CommandListener(WatchedMessageManager msgMan) {
@@ -26,21 +29,24 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         String command = event.getName();
-        if(command.equals("createevent")) {
-            TextChannel chosenChannel = event.getOption("channel").getAsChannel().asTextChannel();
+        if(command.equals(ACC_EVENT_CMD)) {
+            TextChannel chosenChannel = event.getChannel().asTextChannel();
             String date     = event.getOption("date").getAsString();
             String title    = event.getOption("title").getAsString();
             Role roleToPing = event.getOption("role").getAsRole();
-            if(!inputsValid(chosenChannel, date, title, roleToPing, event)) {
+            Role reserveRoleToPing = event.getOption("reserverole").getAsRole();
+            if(!inputsValid(chosenChannel, date, title, roleToPing, reserveRoleToPing, event)) {
+                event.reply("Invalid inputs").setEphemeral(true).queue();
                 return;
             }
             
             long timestamp = Long.parseLong(date);
             if(!isValidDate(timestamp, event)) {
+                event.reply("Invalid inputs").setEphemeral(true).queue();
                 return;
             }
             
-            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, roleToPing);
+            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, roleToPing, reserveRoleToPing);
             chosenChannel.sendMessage(MessageBuilder.createMessage(ws))
             .addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
             .queue((message) -> {
@@ -50,7 +56,7 @@ public class CommandListener extends ListenerAdapter {
             });
             
             event.reply("Done!").setEphemeral(true).queue();
-        } else if(command.equals("racestats")) {
+        } else if(command.equals(RACE_STATS_CMD)) {
             event.deferReply().queue();
             String outputPath = "temp/";
             String url = event.getOption("url").getAsString();
@@ -76,7 +82,7 @@ public class CommandListener extends ListenerAdapter {
         }
     }
     
-    private boolean inputsValid(TextChannel chosenChannel, String date, String title, Role roleToPing, SlashCommandInteractionEvent event) {
+    private boolean inputsValid(TextChannel chosenChannel, String date, String title, Role roleToPing, Role reserveRoleToPing, SlashCommandInteractionEvent event) {
         if(!isValidDateString(date)) {
             event.reply("The date string was not formatted correctly. See the parameter description for an example.").setEphemeral(true).queue();
             return false;
@@ -85,7 +91,7 @@ public class CommandListener extends ListenerAdapter {
             event.reply("No permission to post in given channel.").setEphemeral(true).queue();
             return false;
         }
-        if(!roleToPing.isMentionable()) {
+        if(!roleToPing.isMentionable() || !reserveRoleToPing.isMentionable()) {
             event.reply("Given role is not pingable by bot.").setEphemeral(true).queue();
             return false;
         }
