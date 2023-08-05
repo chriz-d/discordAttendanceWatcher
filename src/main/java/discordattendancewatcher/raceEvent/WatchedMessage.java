@@ -26,17 +26,26 @@ public class WatchedMessage implements Serializable {
     
     private long date;
     private String title;
+    private String track;
     private transient Role roleToPing;
     private transient Role reserveRoleToPing;
+    private String raceFormat;
+    private String details;
+    private String imagePath;
     
-    public WatchedMessage(TextChannel channel, long date, String title, Role roleToPing, Role reserveRoleToPing) {
+    public WatchedMessage(TextChannel channel, long date, String title, String track, Role roleToPing, 
+        Role reserveRoleToPing, String raceFormat, String details, String imagePath) {
         this.channel = channel;
         attendees = Collections.synchronizedSet(new HashSet<>());
         absentees = Collections.synchronizedSet(new HashSet<>());
         this.date = date;
         this.title = title;
+        this.track = track;
         this.roleToPing = roleToPing;
         this.reserveRoleToPing = reserveRoleToPing;
+        this.raceFormat = raceFormat;
+        this.details = details;
+        this.imagePath = imagePath;
     }
     
     public boolean hasReacted(User user) {
@@ -69,6 +78,10 @@ public class WatchedMessage implements Serializable {
         return title;
     }
 
+    public String getTrack() {
+        return track;
+    }
+
     public Role getRoleToPing() {
         return roleToPing;
     }
@@ -80,7 +93,19 @@ public class WatchedMessage implements Serializable {
     public StandardGuildMessageChannel getChannel() {
         return channel;
     }
-    
+
+    public String getRaceFormat() {
+        return raceFormat;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
     // JDA does not support serialization, convert all objects to their long ids
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();

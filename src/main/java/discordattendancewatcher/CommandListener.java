@@ -8,9 +8,11 @@ import discordattendancewatcher.raceEvent.WatchedMessage;
 import discordattendancewatcher.raceEvent.WatchedMessageManager;
 import discordattendancewatcher.raceStats.RaceStatsParser;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -33,22 +35,31 @@ public class CommandListener extends ListenerAdapter {
             TextChannel chosenChannel = event.getChannel().asTextChannel();
             String date     = event.getOption("date").getAsString();
             String title    = event.getOption("title").getAsString();
+            String track = event.getOption("track").getAsString();
             Role roleToPing = event.getOption("role").getAsRole();
             Role reserveRoleToPing = event.getOption("reserverole").getAsRole();
+            String raceformat = event.getOption("raceformat", "",  OptionMapping::getAsString).replace("|", "\n"); // Discord strips newline chars from user input
+            String details = event.getOption("details", "",  OptionMapping::getAsString).replace("|", "\n");
+            Attachment image = event.getOption("image", arg0 -> arg0.getAsAttachment());
+            String imagePath = "";
+            if(image != null) {
+                imagePath = image.getFileName();
+                image.getProxy().downloadToFile(new File("assets/" + imagePath)).join(); // Wait for download to finish
+            }
             if(!inputsValid(chosenChannel, date, title, roleToPing, reserveRoleToPing, event)) {
-                event.reply("Invalid inputs").setEphemeral(true).queue();
                 return;
             }
             
             long timestamp = Long.parseLong(date);
             if(!isValidDate(timestamp, event)) {
-                event.reply("Invalid inputs").setEphemeral(true).queue();
                 return;
             }
             
-            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, roleToPing, reserveRoleToPing);
-            chosenChannel.sendMessage(MessageBuilder.createMessage(ws))
+            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, track, roleToPing, reserveRoleToPing, raceformat, details, imagePath);
+            chosenChannel.sendMessageEmbeds(MessageBuilder.createMessage(ws))
             .addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
+            .addContent(ws.getRoleToPing().getAsMention() + " " + ws.getReserveRoleToPing().getAsMention())
+            .addFiles(FileUpload.fromData(new File("assets/logo_white.png"), "logo_white.png"), FileUpload.fromData(new File("assets/" + imagePath), imagePath))
             .queue((message) -> {
                 long msgId = message.getIdLong();
                 msgMan.watchMessage(msgId, ws);

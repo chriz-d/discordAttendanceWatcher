@@ -26,11 +26,11 @@ public class ReactionListener extends ListenerAdapter {
         
         if(event.getComponentId().equals("attend")) {
             msgMan.markAttendance(msgId, userWhoClicked);
-            event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
+            event.editMessageEmbeds(MessageBuilder.createMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your attendance.").setEphemeral(true).queue();
         } else if(event.getComponentId().equals("absent")) {
             msgMan.markAbsence(msgId, userWhoClicked);
-            event.editMessage(MessageBuilder.rebuildMessage(ws)).queue();
+            event.editMessageEmbeds(MessageBuilder.createMessage(ws)).queue();
             event.getHook().sendMessage("You have marked your absence.").setEphemeral(true).queue();
         }
     }

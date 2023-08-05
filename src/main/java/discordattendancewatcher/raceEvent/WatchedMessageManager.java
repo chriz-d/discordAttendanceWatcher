@@ -43,9 +43,11 @@ public class WatchedMessageManager implements Serializable {
         return watchedMessages.get(msgId);
     }
     
-    public void stopWatchingMessage(long msgId) {
+    public void deleteMessage(long msgId) {
+        // Message actually only gets deleted from manager, not discord
         WatchedMessage msg = getWatchedMessage(msgId);
         msg.getChannel().editMessageComponentsById(msgId, new ArrayList<LayoutComponent>()).queue(); // create empty list to remove buttons
+        msg.getChannel().editMessageById(msgId, "The event is over.").queue();
         watchedMessages.remove(msgId);
         System.out.printf("Stopped watching message and monitoring total of %d messages\n", watchedMessages.size());
         saveChanges();
@@ -53,7 +55,7 @@ public class WatchedMessageManager implements Serializable {
     
     public void queueMessageDeletion(long timestamp, long msgId) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
-        Thread t1 = new Thread(() -> stopWatchingMessage(msgId));
+        Thread t1 = new Thread(() -> deleteMessage(msgId));
         System.out.printf("Scheduling deletion in %d seconds\n", timestamp - currentTimestamp);
         ses.schedule(t1, timestamp - currentTimestamp, TimeUnit.SECONDS);
     }
