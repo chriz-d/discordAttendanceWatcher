@@ -63,8 +63,8 @@ public class CommandRegister extends ListenerAdapter {
         OptionData roleToPing = new OptionData(OptionType.ROLE, "role", "Who to ping for the event.", true);
         OptionData reserveRoleToPing = new OptionData(OptionType.ROLE, "reserverole", "Who to ping for the event (reserve).", true);
         OptionData image = new OptionData(OptionType.ATTACHMENT, "image", "The image which will be shown below the post", true);
-        OptionData raceFormat = new OptionData(OptionType.STRING, "raceformat", "Textblock for the race format. Use \\n to start a new line.");
-        OptionData details = new OptionData(OptionType.STRING, "details", "Misc details. Use \\n to start a new line.");
+        OptionData raceFormat = new OptionData(OptionType.STRING, "raceformat", "Textblock for the race format. Use | to start a new line.");
+        OptionData details = new OptionData(OptionType.STRING, "details", "Misc details. Use | to start a new line.");
         SlashCommandData command = Commands.slash("accevent", "Posts a new ACC event.")
                 .addOptions(date, title, track, roleToPing, reserveRoleToPing, image, raceFormat, details);
         return command;

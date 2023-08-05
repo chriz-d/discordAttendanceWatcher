@@ -26,13 +26,13 @@ public class MessageBuilder {
             attendeesString.append(user.getAsMention());
             attendeesString.append("\n");
         }
-        eb.addField("Attendending", attendeesString.toString(), true);
+        eb.addField("Attending", attendeesString.toString(), true);
         StringBuffer absenteesString = new StringBuffer();
         for(User user : ws.getAbsentees()) {
             absenteesString.append(user.getAsMention());
             absenteesString.append("\n");
         }
-        eb.addField("Not attendending", absenteesString.toString(), true);
+        eb.addField("Not attending", absenteesString.toString(), true);
         //eb.addBlankField(true);
 
         eb.addField("Race format", ws.getRaceFormat(), false);
