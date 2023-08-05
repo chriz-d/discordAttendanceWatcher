@@ -15,9 +15,7 @@ public class MessageBuilder {
         eb.setTitle(ws.getTrack(), "https://www.thesimgrid.com/championships/4018");
         eb.setColor(new Color(255, 255, 255));
         eb.setAuthor(ws.getTitle());
-        if(!ws.getImageName().isEmpty()) {
-            eb.setImage("attachment://" + ws.getImageName());
-        }
+        eb.setImage("attachment://" + ws.getImageName());
         eb.setThumbnail("attachment://logo_white.png");
         String eventDate = "Next event will start <t:" + ws.getDate() + ">\n";
         String text = "Please mark your attendance by pressing one of the corresponding buttons.";
@@ -35,10 +33,11 @@ public class MessageBuilder {
             absenteesString.append("\n");
         }
         eb.addField("Not attendending", absenteesString.toString(), true);
-        eb.addBlankField(true);
+        //eb.addBlankField(true);
 
-        eb.addField("Race format", ws.getRaceFormat(), true);
-        eb.addField("Details", ws.getDetails(), true);
+        eb.addField("Race format", ws.getRaceFormat(), false);
+        eb.addField("Details", ws.getDetails(), false);
+        //eb.addBlankField(true);
         return eb.build();
     }
     
