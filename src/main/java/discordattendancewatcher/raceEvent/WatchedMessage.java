@@ -31,7 +31,7 @@ public class WatchedMessage implements Serializable {
     private transient Role reserveRoleToPing;
     private String raceFormat;
     private String details;
-    private String imagePath;
+    private String imageName;
     
     public WatchedMessage(TextChannel channel, long date, String title, String track, Role roleToPing, 
         Role reserveRoleToPing, String raceFormat, String details, String imagePath) {
@@ -45,7 +45,7 @@ public class WatchedMessage implements Serializable {
         this.reserveRoleToPing = reserveRoleToPing;
         this.raceFormat = raceFormat;
         this.details = details;
-        this.imagePath = imagePath;
+        this.imageName = imagePath;
     }
     
     public boolean hasReacted(User user) {
@@ -102,8 +102,8 @@ public class WatchedMessage implements Serializable {
         return details;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageName() {
+        return imageName;
     }
 
     // JDA does not support serialization, convert all objects to their long ids

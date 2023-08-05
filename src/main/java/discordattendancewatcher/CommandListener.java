@@ -40,12 +40,11 @@ public class CommandListener extends ListenerAdapter {
             Role reserveRoleToPing = event.getOption("reserverole").getAsRole();
             String raceformat = event.getOption("raceformat", "",  OptionMapping::getAsString).replace("|", "\n"); // Discord strips newline chars from user input
             String details = event.getOption("details", "",  OptionMapping::getAsString).replace("|", "\n");
-            Attachment image = event.getOption("image", arg0 -> arg0.getAsAttachment());
-            String imagePath = "";
-            if(image != null) {
-                imagePath = image.getFileName();
-                image.getProxy().downloadToFile(new File("assets/" + imagePath)).join(); // Wait for download to finish
-            }
+            Attachment image = event.getOption("image").getAsAttachment();
+
+            String imageName = image.getFileName();
+            image.getProxy().downloadToFile(new File("assets/" + imageName)).join(); // Wait for download to finish
+
             if(!inputsValid(chosenChannel, date, title, roleToPing, reserveRoleToPing, event)) {
                 return;
             }
@@ -55,11 +54,11 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
             
-            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, track, roleToPing, reserveRoleToPing, raceformat, details, imagePath);
+            WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, track, roleToPing, reserveRoleToPing, raceformat, details, imageName);
             chosenChannel.sendMessageEmbeds(MessageBuilder.createMessage(ws))
             .addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
             .addContent(ws.getRoleToPing().getAsMention() + " " + ws.getReserveRoleToPing().getAsMention())
-            .addFiles(FileUpload.fromData(new File("assets/logo_white.png"), "logo_white.png"), FileUpload.fromData(new File("assets/" + imagePath), imagePath))
+            .addFiles(FileUpload.fromData(new File("assets/logo_white.png"), "logo_white.png"), FileUpload.fromData(new File("assets/" + imageName), imageName))
             .queue((message) -> {
                 long msgId = message.getIdLong();
                 msgMan.watchMessage(msgId, ws);

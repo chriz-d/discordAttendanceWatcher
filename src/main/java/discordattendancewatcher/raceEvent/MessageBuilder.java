@@ -15,7 +15,9 @@ public class MessageBuilder {
         eb.setTitle(ws.getTrack(), "https://www.thesimgrid.com/championships/4018");
         eb.setColor(new Color(255, 255, 255));
         eb.setAuthor(ws.getTitle());
-        eb.setImage("attachment://" + ws.getImagePath());
+        if(!ws.getImageName().isEmpty()) {
+            eb.setImage("attachment://" + ws.getImageName());
+        }
         eb.setThumbnail("attachment://logo_white.png");
         String eventDate = "Next event will start <t:" + ws.getDate() + ">\n";
         String text = "Please mark your attendance by pressing one of the corresponding buttons.";
