@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,7 +21,6 @@ public class WatchedMessageManager implements Serializable {
     private static final long serialVersionUID = -5171307135508414035L;
     private Map<Long, WatchedMessage> watchedMessages;
     private transient ScheduledExecutorService ses;
-    
     
     public WatchedMessageManager() {
         watchedMessages = new ConcurrentHashMap<>();
@@ -69,13 +67,14 @@ public class WatchedMessageManager implements Serializable {
     }
     
     public void markAttendance(long msgId, User user) {
-        watchedMessages.get(msgId).markAttendance(user);
-        System.out.printf("Marked attendance for %s in message %d\n", user.getEffectiveName(), msgId);
+        WatchedMessage msg = watchedMessages.get(msgId);
+        msg.markAttendance(user);
         saveChanges();
     }
     
     public void markAbsence(long msgId, User user) {
-        watchedMessages.get(msgId).markAbsence(user);
+        WatchedMessage msg = watchedMessages.get(msgId);
+        msg.markAbsence(user);
         System.out.printf("Marked absence for %s in message %d\n", user.getEffectiveName(), msgId);
         saveChanges();
     }

@@ -1,6 +1,7 @@
 package discordattendancewatcher.raceEvent;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -21,23 +22,21 @@ public class MessageBuilder {
         String text = "Please mark your attendance by pressing one of the corresponding buttons.";
 
         eb.setDescription(eventDate + text);
-        StringBuffer attendeesString = new StringBuffer();
-        for(User user : ws.getAttendees()) {
-            attendeesString.append(user.getAsMention());
-            attendeesString.append("\n");
+
+        // Attendees
+        int driverCount = ws.getAttendees().size();
+        addDrivers(eb, "Attending", 0, Math.min(WatchedMessage.MAX_DRIVERS, driverCount), ws.getAttendees(), true);
+
+        // Absentees
+        addDrivers(eb, "Not attending", 0, ws.getAbsentees().size(), ws.getAbsentees(), true);
+
+        // Waiting attendees
+        if(driverCount > WatchedMessage.MAX_DRIVERS) {
+            addDrivers(eb, "Waiting for slot", WatchedMessage.MAX_DRIVERS, ws.getAttendees().size(), ws.getAttendees(), false);
         }
-        eb.addField("Attending", attendeesString.toString(), true);
-        StringBuffer absenteesString = new StringBuffer();
-        for(User user : ws.getAbsentees()) {
-            absenteesString.append(user.getAsMention());
-            absenteesString.append("\n");
-        }
-        eb.addField("Not attending", absenteesString.toString(), true);
-        //eb.addBlankField(true);
 
         eb.addField("Race format", ws.getRaceFormat(), false);
         eb.addField("Details", ws.getDetails(), false);
-        //eb.addBlankField(true);
         return eb.build();
     }
     
@@ -45,5 +44,16 @@ public class MessageBuilder {
         MessageEditBuilder meb = new MessageEditBuilder();
         // meb.setContent(createMessage(ms).); // extract raw content, we want to keep the buttons
         return meb.build();
+    }
+
+    private static void addDrivers(EmbedBuilder eb, String title, int startIdx, int endIdx, List<User> list, boolean inline) {
+        // Waiting attendees
+        StringBuffer formattedDrivers = new StringBuffer();
+        for(int i = startIdx; i < endIdx; i++) {
+            formattedDrivers.append(i+1 + ". ");
+            formattedDrivers.append(list.get(i).getAsMention());
+            formattedDrivers.append("\n");
+        }
+        eb.addField(title, formattedDrivers.toString(), inline);
     }
 }

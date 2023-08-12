@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -18,9 +19,11 @@ import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChanne
 
 public class WatchedMessage implements Serializable {
     
+    public static final int MAX_DRIVERS = 28;
+
     private static final long serialVersionUID = 8798489204520754938L;
-    private transient Set<User> attendees;
-    private transient Set<User> absentees;
+    private transient List<User> attendees;
+    private transient List<User> absentees;
     
     private transient TextChannel channel;
     
@@ -36,8 +39,8 @@ public class WatchedMessage implements Serializable {
     public WatchedMessage(TextChannel channel, long date, String title, String track, Role roleToPing, 
         Role reserveRoleToPing, String raceFormat, String details, String imagePath) {
         this.channel = channel;
-        attendees = Collections.synchronizedSet(new HashSet<>());
-        absentees = Collections.synchronizedSet(new HashSet<>());
+        attendees = Collections.synchronizedList(new ArrayList<>());
+        absentees = Collections.synchronizedList(new ArrayList<>());
         this.date = date;
         this.title = title;
         this.track = track;
@@ -54,19 +57,23 @@ public class WatchedMessage implements Serializable {
     
     public void markAttendance(User user) {
         absentees.remove(user);
-        attendees.add(user);
+        if(!attendees.contains(user)) {
+            attendees.add(user);
+        }
     }
     
     public void markAbsence(User user) {
         attendees.remove(user);
-        absentees.add(user);
+        if(!absentees.contains(user)) {
+            absentees.add(user);
+        }
     }
     
-    public Set<User> getAttendees() {
+    public List<User> getAttendees() {
         return attendees;
     }
     
-    public Set<User> getAbsentees() {
+    public List<User> getAbsentees() {
         return absentees;
     }
     
@@ -109,12 +116,12 @@ public class WatchedMessage implements Serializable {
     // JDA does not support serialization, convert all objects to their long ids
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        Set<Long> attendeesLong = new HashSet<>();
+        List<Long> attendeesLong = new ArrayList<>();
         for(User user : attendees) {
             attendeesLong.add(user.getIdLong());
         }
         out.writeObject(attendeesLong);
-        Set<Long> absenteesLong = new HashSet<>();
+        List<Long> absenteesLong = new ArrayList<>();
         for(User user : absentees) {
             absenteesLong.add(user.getIdLong());
         }
@@ -126,15 +133,15 @@ public class WatchedMessage implements Serializable {
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        attendees = Collections.synchronizedSet(new HashSet<>());
+        attendees = Collections.synchronizedList(new ArrayList<>());
         @SuppressWarnings("unchecked")
-        Set<Long> attendeesLong = (Set<Long>) in.readObject();
+        List<Long> attendeesLong = (List<Long>) in.readObject();
         for(Long user : attendeesLong) {
             attendees.add(App.jda.retrieveUserById(user).complete());
         }
-        absentees = Collections.synchronizedSet(new HashSet<>());
+        absentees = Collections.synchronizedList(new ArrayList<>());
         @SuppressWarnings("unchecked")
-        Set<Long> absenteesLong = (Set<Long>) in.readObject();
+        List<Long> absenteesLong = (List<Long>) in.readObject();
         for(Long user : absenteesLong) {
             absentees.add(App.jda.retrieveUserById(user).complete());
         }
