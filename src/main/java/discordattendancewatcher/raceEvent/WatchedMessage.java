@@ -19,7 +19,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChanne
 
 public class WatchedMessage implements Serializable {
     
-    public static final int MAX_DRIVERS = 28;
+    public static final int MAX_DRIVERS = 1;
 
     private static final long serialVersionUID = 8798489204520754938L;
     private transient List<User> attendees;
