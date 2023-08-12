@@ -58,7 +58,7 @@ public class ReactionListener extends ListenerAdapter {
 
         // Someone marked his absence, notify potentially waiting people about slot
         if(driverCountBefore > WatchedMessage.MAX_DRIVERS && driverCountAfter <= WatchedMessage.MAX_DRIVERS) {
-            ws.getAttendees().get(driverCountAfter - 1).openPrivateChannel().complete()
+            ws.getAttendees().get(WatchedMessage.MAX_DRIVERS).openPrivateChannel().complete()
                 .sendMessage("A slot has become available and you have been moved into attending in the following event: " + event.getMessage().getJumpUrl()).queue();
         }
     }
