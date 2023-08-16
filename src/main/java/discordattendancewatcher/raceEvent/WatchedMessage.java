@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -19,7 +20,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChanne
 
 public class WatchedMessage implements Serializable {
     
-    public static final int MAX_DRIVERS = 1;
+    public static final int MAX_DRIVERS = 32;
 
     private static final long serialVersionUID = 8798489204520754938L;
     private transient List<User> attendees;
@@ -57,8 +58,20 @@ public class WatchedMessage implements Serializable {
     
     public void markAttendance(User user) {
         absentees.remove(user);
-        if(!attendees.contains(user)) {
-            attendees.add(user);
+        if(attendees.contains(user)) {
+            return;
+        }
+        Guild guild = channel.getGuild();
+        List<Role> userRoles =  guild.getMember(user).getRoles();
+        boolean isFullTimeDriver = userRoles.contains(roleToPing);
+        if(isFullTimeDriver) {
+            int i = 0;
+            while(!guild.getMember(attendees.get(i)).getRoles().contains(roleToPing) && i < attendees.size()) {
+                i++;
+            }
+            attendees.add(i, user);
+        } else {
+            attendees.add(user); // reserve driver, lowest prio
         }
     }
     
