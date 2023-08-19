@@ -64,7 +64,7 @@ public class WatchedMessage implements Serializable {
         boolean isFullTimeDriver = userRoles.contains(roleToPing);
         if(isFullTimeDriver && attendees.size() > 0) {
             int i = 0;
-            while(i < attendees.size() && !attendees.get(i).getRoles().contains(roleToPing)) {
+            while(i < attendees.size() && attendees.get(i).getRoles().contains(roleToPing)) {
                 i++;
             }
             attendees.add(i - 1, member);
