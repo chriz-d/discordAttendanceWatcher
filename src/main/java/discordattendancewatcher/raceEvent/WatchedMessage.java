@@ -1,6 +1,5 @@
 package discordattendancewatcher.raceEvent;
 
-import java.util.Set;
 
 import discordattendancewatcher.App;
 
@@ -13,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
@@ -23,8 +22,8 @@ public class WatchedMessage implements Serializable {
     public static final int MAX_DRIVERS = 32;
 
     private static final long serialVersionUID = 8798489204520754938L;
-    private transient List<User> attendees;
-    private transient List<User> absentees;
+    private transient List<Member> attendees;
+    private transient List<Member> absentees;
     
     private transient TextChannel channel;
     
@@ -52,41 +51,40 @@ public class WatchedMessage implements Serializable {
         this.imageName = imagePath;
     }
     
-    public boolean hasReacted(User user) {
-        return attendees.contains(user) || absentees.contains(user);
+    public boolean hasReacted(Member member) {
+        return attendees.contains(member) || absentees.contains(member);
     }
     
-    public void markAttendance(User user) {
-        absentees.remove(user);
-        if(attendees.contains(user)) {
+    public void markAttendance(Member member) {
+        absentees.remove(member);
+        if(attendees.contains(member)) {
             return;
         }
-        Guild guild = channel.getGuild();
-        List<Role> userRoles =  guild.getMember(user).getRoles();
+        List<Role> userRoles =  member.getRoles();
         boolean isFullTimeDriver = userRoles.contains(roleToPing);
-        if(isFullTimeDriver) {
+        if(isFullTimeDriver && attendees.size() > 0) {
             int i = 0;
-            while(!guild.getMember(attendees.get(i)).getRoles().contains(roleToPing) && i < attendees.size()) {
+            while(i < attendees.size() && !attendees.get(i).getRoles().contains(roleToPing)) {
                 i++;
             }
-            attendees.add(i, user);
+            attendees.add(i - 1, member);
         } else {
-            attendees.add(user); // reserve driver, lowest prio
+            attendees.add(member); // reserve driver, lowest prio
         }
     }
     
-    public void markAbsence(User user) {
-        attendees.remove(user);
-        if(!absentees.contains(user)) {
-            absentees.add(user);
+    public void markAbsence(Member member) {
+        attendees.remove(member);
+        if(!absentees.contains(member)) {
+            absentees.add(member);
         }
     }
     
-    public List<User> getAttendees() {
+    public List<Member> getAttendees() {
         return attendees;
     }
     
-    public List<User> getAbsentees() {
+    public List<Member> getAbsentees() {
         return absentees;
     }
     
@@ -130,13 +128,13 @@ public class WatchedMessage implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         List<Long> attendeesLong = new ArrayList<>();
-        for(User user : attendees) {
-            attendeesLong.add(user.getIdLong());
+        for(Member member : attendees) {
+            attendeesLong.add(member.getIdLong());
         }
         out.writeObject(attendeesLong);
         List<Long> absenteesLong = new ArrayList<>();
-        for(User user : absentees) {
-            absenteesLong.add(user.getIdLong());
+        for(Member member : absentees) {
+            absenteesLong.add(member.getIdLong());
         }
         out.writeObject(absenteesLong);
         out.writeObject(channel.getIdLong());
@@ -149,17 +147,20 @@ public class WatchedMessage implements Serializable {
         attendees = Collections.synchronizedList(new ArrayList<>());
         @SuppressWarnings("unchecked")
         List<Long> attendeesLong = (List<Long>) in.readObject();
-        for(Long user : attendeesLong) {
-            attendees.add(App.jda.retrieveUserById(user).complete());
-        }
+
         absentees = Collections.synchronizedList(new ArrayList<>());
         @SuppressWarnings("unchecked")
         List<Long> absenteesLong = (List<Long>) in.readObject();
-        for(Long user : absenteesLong) {
-            absentees.add(App.jda.retrieveUserById(user).complete());
-        }
+
         channel = App.jda.getTextChannelById((long) in.readObject());
         roleToPing = App.jda.getRoleById((long) in.readObject());
         reserveRoleToPing = App.jda.getRoleById((long) in.readObject());
+        Guild guild = channel.getGuild();
+        for(Long user : attendeesLong) {
+            attendees.add(guild.retrieveMemberById(user).complete());
+        }
+        for(Long user : absenteesLong) {
+            absentees.add(guild.retrieveMemberById(user).complete());
+        }
     }
 }

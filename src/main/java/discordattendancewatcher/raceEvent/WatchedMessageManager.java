@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,16 +66,16 @@ public class WatchedMessageManager implements Serializable {
         }
     }
     
-    public void markAttendance(long msgId, User user) {
+    public void markAttendance(long msgId, Member member) {
         WatchedMessage msg = watchedMessages.get(msgId);
-        msg.markAttendance(user);
+        msg.markAttendance(member);
         saveChanges();
     }
     
-    public void markAbsence(long msgId, User user) {
+    public void markAbsence(long msgId, Member member) {
         WatchedMessage msg = watchedMessages.get(msgId);
-        msg.markAbsence(user);
-        System.out.printf("Marked absence for %s in message %d\n", user.getEffectiveName(), msgId);
+        msg.markAbsence(member);
+        System.out.printf("Marked absence for %s in message %d\n", member.getEffectiveName(), msgId);
         saveChanges();
     }
     

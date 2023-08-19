@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class App {
     
@@ -36,9 +38,10 @@ public class App {
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.watching("your attendance"))
             .addEventListeners(new CommandRegister())
+            .enableIntents(GatewayIntent.GUILD_MEMBERS)
+            .setMemberCachePolicy(MemberCachePolicy.ALL)
             .build();
         jda.awaitReady();
-
         WatchedMessageManager msgMan;
         File f = new File("currentWatched.ser");
         if(f.exists() && f.isFile()) {
@@ -49,7 +52,6 @@ public class App {
             msgMan = new WatchedMessageManager();
             System.out.println("No old messages found, creating new MessageManager");
         }
-        
         jda.addEventListener(new CommandListener(msgMan), new ReactionListener(msgMan));
     }
 }
