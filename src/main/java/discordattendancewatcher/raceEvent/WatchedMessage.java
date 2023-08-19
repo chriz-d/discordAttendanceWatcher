@@ -67,7 +67,7 @@ public class WatchedMessage implements Serializable {
             while(i < attendees.size() && attendees.get(i).getRoles().contains(roleToPing)) {
                 i++;
             }
-            attendees.add(i - 1, member);
+            attendees.add(i, member);
         } else {
             attendees.add(member); // reserve driver, lowest prio
         }
