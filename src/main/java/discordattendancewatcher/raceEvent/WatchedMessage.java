@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -57,19 +58,8 @@ public class WatchedMessage implements Serializable {
     
     public void markAttendance(Member member) {
         absentees.remove(member);
-        if(attendees.contains(member)) {
-            return;
-        }
-        List<Role> userRoles =  member.getRoles();
-        boolean isFullTimeDriver = userRoles.contains(roleToPing);
-        if(isFullTimeDriver && attendees.size() > 0) {
-            int i = 0;
-            while(i < attendees.size() && attendees.get(i).getRoles().contains(roleToPing)) {
-                i++;
-            }
-            attendees.add(i, member);
-        } else {
-            attendees.add(member); // reserve driver, lowest prio
+        if(!attendees.contains(member)) {
+            attendees.add(member);
         }
     }
     
@@ -162,5 +152,19 @@ public class WatchedMessage implements Serializable {
         for(Long user : absenteesLong) {
             absentees.add(guild.retrieveMemberById(user).complete());
         }
+    }
+
+    public Comparator<Member> getSorter() {
+        Comparator<Member> comp = new Comparator<>() {
+            @Override
+            public int compare(Member arg0, Member arg1) {
+                if(arg0.getRoles().contains(roleToPing) && arg0.getRoles().contains(reserveRoleToPing)) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        };
+        return comp;
     }
 }
