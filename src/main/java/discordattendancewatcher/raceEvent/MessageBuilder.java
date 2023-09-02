@@ -20,7 +20,6 @@ public class MessageBuilder {
         eb.setThumbnail("attachment://logo_white.png");
         String eventDate = "Next event will start <t:" + ws.getDate() + ">\n";
         String text = "Please mark your attendance by pressing one of the corresponding buttons.";
-        ws.getAttendees().sort(ws.getSorter());
         eb.setDescription(eventDate + text);
 
         // Attendees

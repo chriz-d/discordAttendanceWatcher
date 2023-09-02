@@ -58,7 +58,17 @@ public class WatchedMessage implements Serializable {
     
     public void markAttendance(Member member) {
         absentees.remove(member);
-        if(!attendees.contains(member)) {
+        if(attendees.contains(member)) {
+            return;
+        }
+        if(member.getRoles().contains(roleToPing)) {
+            System.out.println("Contains!");
+            int i = 0;
+            while(i < attendees.size() && attendees.get(i).getRoles().contains(roleToPing)) {
+                i++;
+            }
+            attendees.add(i, member);
+        } else {
             attendees.add(member);
         }
     }
@@ -152,19 +162,5 @@ public class WatchedMessage implements Serializable {
         for(Long user : absenteesLong) {
             absentees.add(guild.retrieveMemberById(user).complete());
         }
-    }
-
-    public Comparator<Member> getSorter() {
-        Comparator<Member> comp = new Comparator<>() {
-            @Override
-            public int compare(Member arg0, Member arg1) {
-                if(arg0.getRoles().contains(roleToPing) && arg0.getRoles().contains(reserveRoleToPing)) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-        };
-        return comp;
     }
 }
