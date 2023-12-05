@@ -13,26 +13,26 @@ public class MessageBuilder {
     
     public static MessageEmbed createMessage(WatchedMessage ws) {
         EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle(ws.getTrack(), "https://www.thesimgrid.com/championships/4018");
+        eb.setTitle(ws.getTrack(), "https://www.thesimgrid.com/championships/5461");
         eb.setColor(new Color(255, 255, 255));
         eb.setAuthor(ws.getTitle());
         eb.setImage("attachment://" + ws.getImageName());
         eb.setThumbnail("attachment://logo_white.png");
         String eventDate = "Next event will start <t:" + ws.getDate() + ">\n";
-        String text = "Please mark your attendance by pressing one of the corresponding buttons.";
+        String text = "If you cannot race please visit simgrid and hit 'withdraw' or else you will loose attendance rating.";
         eb.setDescription(eventDate + text);
 
-        // Attendees
-        int driverCount = ws.getAttendees().size();
-        addDrivers(eb, "Attending", 0, Math.min(WatchedMessage.MAX_DRIVERS, driverCount), ws.getAttendees(), true, ws);
+        // // Attendees
+        // int driverCount = ws.getAttendees().size();
+        // addDrivers(eb, "Attending", 0, Math.min(WatchedMessage.MAX_DRIVERS, driverCount), ws.getAttendees(), true, ws);
 
-        // Absentees
-        addDrivers(eb, "Not attending", 0, ws.getAbsentees().size(), ws.getAbsentees(), true, ws);
+        // // Absentees
+        // addDrivers(eb, "Not attending", 0, ws.getAbsentees().size(), ws.getAbsentees(), true, ws);
 
-        // Waiting attendees
-        if(driverCount > WatchedMessage.MAX_DRIVERS) {
-            addDrivers(eb, "Waiting for slot", WatchedMessage.MAX_DRIVERS, ws.getAttendees().size(), ws.getAttendees(), false, ws);
-        }
+        // // Waiting attendees
+        // if(driverCount > WatchedMessage.MAX_DRIVERS) {
+        //     addDrivers(eb, "Waiting for slot", WatchedMessage.MAX_DRIVERS, ws.getAttendees().size(), ws.getAttendees(), false, ws);
+        // }
 
         if(!ws.getRaceFormat().isEmpty()) {
             eb.addField("Race format", ws.getRaceFormat(), false);

@@ -56,7 +56,7 @@ public class CommandListener extends ListenerAdapter {
             
             WatchedMessage ws = new WatchedMessage(chosenChannel, timestamp, title, track, roleToPing, reserveRoleToPing, raceformat, details, imageName);
             chosenChannel.sendMessageEmbeds(MessageBuilder.createMessage(ws))
-            .addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
+            //.addActionRow(Button.primary("attend", "Mark attendance"), Button.danger("absent", "Mark absence"))
             .addContent(ws.getRoleToPing().getAsMention() + " " + ws.getReserveRoleToPing().getAsMention())
             .addFiles(FileUpload.fromData(new File("assets/logo_white.png"), "logo_white.png"), FileUpload.fromData(new File("assets/" + imageName), imageName))
             .queue((message) -> {
